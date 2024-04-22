@@ -1,0 +1,275 @@
+{
+	"info": {
+		"_postman_id": "c290dec3-843b-4187-bb2e-cef4cae7130b",
+		"name": "Foody",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19534884",
+		"_collection_link": "https://eurosoftdesign.postman.co/workspace/ESD~92c96b6f-86b3-481d-8a90-c567aac0aa9c/collection/19534884-c290dec3-843b-4187-bb2e-cef4cae7130b?action=share&source=collection_link&creator=19534884"
+	},
+	"item": [
+		{
+			"name": "Login and Authentication",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has correct properties\", () => {\r",
+							"    pm.expect(pm.response.json()).to.have.property(\"username\");\r",
+							"    pm.expect(pm.response.json()).to.have.property(\"password\");\r",
+							"    pm.expect(pm.response.json()).to.have.property(\"accessToken\");\r",
+							"})\r",
+							"\r",
+							"pm.collectionVariables.set(\"token\", pm.response.json().accessToken);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"kitt\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/User/Authentication",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"User",
+						"Authentication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a New Food",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const foods = [\"Pizza\", \"Pasta\", \"Sushi\", \"Gelato\"];\r",
+							"const randomFoodIndex = Math.floor(Math.random() * foods.length);\r",
+							"const randomFood = foods[randomFoodIndex];\r",
+							"\r",
+							"const suffix = Math.floor(Math.random() * 10000);\r",
+							"const name = `${randomFood}-${suffix}`;\r",
+							"\r",
+							"pm.collectionVariables.set(\"randomFood\", name)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", () => {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has correct properties\", () => {\r",
+							"    pm.expect(pm.response.json()).to.have.property(\"foodId\");\r",
+							"})\r",
+							"\r",
+							"pm.collectionVariables.set(\"foodId\", pm.response.json().foodId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{randomFood}}\",\r\n    \"description\": \"Random\",\r\n    \"url\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Food/Create",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Food",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Food by Name",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Food/Search?keyword={{randomFood}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Food",
+						"Search"
+					],
+					"query": [
+						{
+							"key": "keyword",
+							"value": "{{randomFood}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit the Name of the Food that you Created",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"path\": \"/name\",\r\n        \"op\": \"replace\",\r\n        \"value\": \"string\"\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Food/Edit/:foodId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Food",
+						"Edit",
+						":foodId"
+					],
+					"variable": [
+						{
+							"key": "foodId",
+							"value": "{{foodId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete the Edited Food",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://softuni-qa-loadbalancer-2137572849.eu-north-1.elb.amazonaws.com:86",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKd3RTZXJ2aWNlQWNjZXNzVG9rZW4iLCJqdGkiOiJjNjViNzU0Ny0wNjJmLTQ4YWItYmE5ZS00YmQ2YzdhODE2YWQiLCJpYXQiOiIwNC8xNS8yMDI0IDE2OjIwOjI5IiwiVXNlcklkIjoiZjRiY2VhMjItOGU1OC00ZmYzLWJhZGEtMDhkYzVkMWYwNzFlIiwiRW1haWwiOiJraXR0LnR1ZkBkb2NrZXJiaWtlLmNvbSIsIlVzZXJOYW1lIjoia2l0dCIsImV4cCI6MTcxMzIxOTYyOSwiaXNzIjoiRm9vZHlfQXBwX1NvZnRVbmkiLCJhdWQiOiJGb29keV9XZWJBUElfU29mdFVuaSJ9.4t49hV7iA6Ccl3saUYsLWyYFJsAuXL87S4OKkxR8i_k"
+		},
+		{
+			"key": "randomFood",
+			"value": ""
+		},
+		{
+			"key": "foodId",
+			"value": ""
+		}
+	]
+}
